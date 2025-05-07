@@ -1,0 +1,73 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from qutip import Qobj
+
+# ─────────────────────────────────────────────────────────────
+# 1)  CIRCUIT & DIODE PARAMETERS
+# ─────────────────────────────────────────────────────────────
+E_C  = 0.05          # charging energy  (sets anharmonicity scale)
+J    = 1.7           # average hopping strength in diode
+lam  = 0.50          # dimerisation 0 ≤ λ ≤ 1
+J1   = J * (1 - lam) # intra‑cell
+J2   = J * (1 + lam) # inter‑cell
+Nphi = 801           # grid points for φ  (odd ⇒ eigen­functions either even/odd)
+
+# ─────────────────────────────────────────────────────────────
+# 2)  BUILD HAMILTONIAN  H = 4E_C n²  +  U_SSH(φ)
+#     • φ  ∈ [−π,π]   periodic boundary conditions
+#     • n = −i ∂/∂φ
+# ─────────────────────────────────────────────────────────────
+phi  = np.linspace(-np.pi, np.pi, Nphi, endpoint=False)
+dphi = phi[1] - phi[0]
+
+# Kinetic term  4E_C n²  →  −4E_C ∂²/∂φ²    (finite difference, periodic)
+main_diag = -2.0 * np.ones(Nphi)
+off_diag  =  1.0 * np.ones(Nphi-1)
+K_mat = (-4.0 * E_C / dphi**2) * (
+          np.diag(main_diag, 0) +
+          np.diag(off_diag,  1) +
+          np.diag(off_diag, -1)
+       )
+# wrap the ends for periodicity
+K_mat[0, -1] = K_mat[-1, 0] = (-4.0 * E_C / dphi**2)
+
+# Potential term  –√(J₁² + J₂² + 2J₁J₂ cosφ)
+U_phi = -np.sqrt(J1**2 + J2**2 + 2*J1*J2*np.cos(phi))
+U_mat = np.diag(U_phi)
+
+# Total Hamiltonian
+H = Qobj(K_mat + U_mat)
+
+# ─────────────────────────────────────────────────────────────
+# 3)  DIAGONALISE  (lowest few states are enough to see quantisation)
+# ─────────────────────────────────────────────────────────────
+n_levels = 4
+energies = H.eigenenergies()[:n_levels]
+
+# ─────────────────────────────────────────────────────────────
+# 4)  PLOT  – potential well + horizontal energy lines
+# ─────────────────────────────────────────────────────────────
+plt.figure(figsize=(10, 6))
+plt.plot(phi, U_phi, label=r'Quantum‑diode potential  '
+                           r'$-\,|J_1+J_2e^{i\phi}|$', color='black')
+
+for i, E in enumerate(energies):
+    # classical “turning points”:  U(φ) ≤ E
+    mask = U_phi <= E + 1e-12
+    if mask.any():
+        phi_L = phi[mask][0]
+        phi_R = phi[mask][-1]
+        plt.hlines(E, phi_L, phi_R,
+                   colors=f'C{i}', linestyles='--', label=fr'$E_{i}$')
+
+plt.title(r'Transmon‑style Circuit with Quantum‑Diode (SSH) Potential')
+plt.xlabel(r'Phase $\phi$')
+plt.ylabel("Energy ($E_n / \hbar\\omega$ units)")
+plt.xlim(-np.pi, np.pi)
+plt.ylim(U_phi.min() - 0.2, -1.5)
+plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5))
+plt.xticks([-np.pi, -np.pi/2, 0, np.pi/2, np.pi],
+               [r'$-\pi$', r'$-\pi/2$', r'$0$', r'$\pi/2$', r'$\pi$'])
+plt.yticks([])
+plt.tight_layout()
+plt.show()
