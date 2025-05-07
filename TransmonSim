@@ -1,0 +1,42 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from qutip import *
+
+# System parameters
+N = 100
+Ec = 1.0 
+EJ = 20.0      
+phi_vals = np.linspace(-np.pi, np.pi, 1000)
+U_phi = -EJ * np.cos(phi_vals)
+
+# Operators
+a = destroy(N)
+phi_op = (a + a.dag()) / np.sqrt(2)
+n_op = (a - a.dag()) / (1j * np.sqrt(2))
+
+# Hamiltonian: H = 4Ec n^2 - EJ cos(phi)
+cos_phi = qeye(N) - (phi_op**2)/2 + (phi_op**4)/24 - (phi_op**6)/720
+H = 4 * Ec * n_op**2 - EJ * cos_phi
+energies = H.eigenenergies()[:8]
+
+plt.figure(figsize=(10, 6))
+plt.plot(phi_vals, U_phi, label='Potential $-E_J \\cos(\\phi)$', color='black')
+
+for i, E in enumerate(energies):
+    crossings = np.where(np.diff(np.sign(U_phi - E)))[0]
+    if len(crossings) >= 2:
+        phi_L = phi_vals[crossings[0]]
+        phi_R = phi_vals[crossings[-1]]
+        plt.hlines(E, phi_L, phi_R, colors=f"C{i}", linestyles='--', label=f"$E_{i}$")
+
+plt.title("Quantized Energy Levels in Transmon Potential Well")
+plt.xlabel("Phase $\\phi$")
+plt.ylabel("Energy ($E_n / \hbar\\omega$ units)")
+plt.xlim(-np.pi, np.pi)
+plt.ylim(-EJ - 0.5, 25)
+plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5))
+plt.xticks([-np.pi, -np.pi/2, 0, np.pi/2, np.pi],
+               [r'$-\pi$', r'$-\pi/2$', r'$0$', r'$\pi/2$', r'$\pi$'])
+plt.yticks([])
+plt.tight_layout()
+plt.show()
