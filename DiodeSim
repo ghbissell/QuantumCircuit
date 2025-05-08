@@ -8,8 +8,8 @@ from qutip import Qobj
 E_C  = 0.05          # charging energy  (sets anharmonicity scale)
 J    = 1.7           # average hopping strength in diode
 lam  = 0.50          # dimerisation 0 ≤ λ ≤ 1
-J1   = J * (1 - lam) # intra‑cell
-J2   = J * (1 + lam) # inter‑cell
+J1   = J * (1 - lam*np.cos(phi)) # intra‑cell
+J2   = J * (1 + lam*np.cos(phi)) # inter‑cell
 Nphi = 801           # grid points for φ  (odd ⇒ eigen­functions either even/odd)
 
 # ─────────────────────────────────────────────────────────────
