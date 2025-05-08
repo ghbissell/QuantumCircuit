@@ -8,8 +8,6 @@ from qutip import Qobj
 E_C  = 0.05          # charging energy  (sets anharmonicity scale)
 J    = 1.7           # average hopping strength in diode
 lam  = 0.50          # dimerisation 0 ≤ λ ≤ 1
-J1   = J * (1 - lam*np.cos(phi)) # intra‑cell
-J2   = J * (1 + lam*np.cos(phi)) # inter‑cell
 Nphi = 801           # grid points for φ  (odd ⇒ eigen­functions either even/odd)
 
 # ─────────────────────────────────────────────────────────────
@@ -19,6 +17,9 @@ Nphi = 801           # grid points for φ  (odd ⇒ eigen­functions either even
 # ─────────────────────────────────────────────────────────────
 phi  = np.linspace(-np.pi, np.pi, Nphi, endpoint=False)
 dphi = phi[1] - phi[0]
+
+J1   = J * (1 - lam*np.cos(phi)) # intra‑cell
+J2   = J * (1 + lam*np.cos(phi)) # inter‑cell
 
 # Kinetic term  4E_C n²  →  −4E_C ∂²/∂φ²    (finite difference, periodic)
 main_diag = -2.0 * np.ones(Nphi)
