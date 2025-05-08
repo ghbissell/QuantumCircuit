@@ -6,7 +6,7 @@ from qutip import Qobj
 # 1)  CIRCUIT & DIODE PARAMETERS
 # ─────────────────────────────────────────────────────────────
 E_C  = 0.05          # charging energy  (sets anharmonicity scale)
-J    = 1.7           # average hopping strength in diode
+J    = 2.5           # average hopping strength in diode
 lam  = 0.50          # dimerisation 0 ≤ λ ≤ 1
 Nphi = 801           # grid points for φ  (odd ⇒ eigen­functions either even/odd)
 
