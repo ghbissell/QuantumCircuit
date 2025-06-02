@@ -1,0 +1,33 @@
+import schemdraw
+import schemdraw.elements as elm
+schemdraw.theme('solarizedl')
+
+with schemdraw.Drawing(unit=3) as d:
+    d += elm.SourceV().up().label(r'$V_G$', loc='top')
+    d += elm.Line().up().length(0.5)
+    d += elm.Capacitor().right().label(r'$C_G$', loc='bottom')
+    d.push()
+    
+    d += elm.Line().down().length(0.5)
+    d += elm.Capacitor().down().label(r'$C_B$', loc='top')
+    d += elm.Line().down().length(0.5)
+    d += elm.Ground()
+    
+    d.pop()
+    d += elm.Line().right()
+    d += elm.Line().down().length(0.5)
+    d.push()
+    d += elm.Line().left().length(1)
+    d += elm.Josephson(box=True).down().label(r'$E_J$,  $C_J$', loc='bottom')
+    d += elm.Line().right(2)
+
+    d.pop()
+    d += elm.Line().right().length(1)
+    d += elm.Josephson(box=True).down()
+    d += elm.Line().left(1)
+    d += elm.Line().down(0.5)
+    d += elm.Line().left(6)
+    d += elm.Line().up(0.5)
+
+    d.draw()                
+    d.save('transmon_circuit.svg')
