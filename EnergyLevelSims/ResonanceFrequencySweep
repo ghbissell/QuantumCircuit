@@ -1,0 +1,43 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import cycler
+
+plt.rcParams.update({
+    "figure.dpi": 130,
+    "axes.grid": True,
+    "grid.linestyle": "--",
+    "legend.frameon": False,
+    "axes.prop_cycle": cycler("color", plt.cm.viridis(np.linspace(0.15, 0.9, 4)))
+})
+
+#  Transmon parameters
+h      = 6.62607015e-34
+phi0   = 2.067833848e-15
+
+EJ_sum_GHz = 50.0
+EC_GHz     = .2
+EJ_sum = EJ_sum_GHz * 1e9 * h
+EC      = EC_GHz   * 1e9 * h
+
+#  Bias flux sweep
+phi_norm = np.linspace(0.0, 1.0, 501)
+phi      = np.pi * phi_norm             # absolute φ_b (rad)
+alpha_list = [0.01, 0.3, 0.6, 0.9]
+
+def EJ_eff(alpha, phi):
+    return EJ_sum * np.abs(np.cos(phi)) * np.sqrt(1 + alpha**2 * np.tan(phi)**2)
+
+def f01_GHz(EJ_eff):
+    return (np.sqrt(8*EC*EJ_eff) - EC) / h / 1e9
+
+fig, ax = plt.subplots(figsize=(3.5, 3.0))
+for alpha in alpha_list:
+    freq = f01_GHz(EJ_eff(alpha, phi))
+    ax.plot(phi_norm, freq, lw=2.0, label=rf"$\alpha={alpha:.2f}$")
+
+ax.set_xlabel(r"$\phi_b$", labelpad=4)
+ax.set_ylabel(r"$\omega_T/2\pi$ (GHz)", labelpad=6)
+ax.minorticks_on()
+ax.tick_params(axis='both', which='both', direction='in', top=True, right=True)
+ax.legend(loc="lower right", ncol=1)
+plt.show()
