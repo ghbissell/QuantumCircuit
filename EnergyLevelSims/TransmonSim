@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from qutip import *
 
 plt.rcParams.update({
-    "figure.dpi": 130,
+    "figure.dpi": 230,
 })
 
 # System parameters
