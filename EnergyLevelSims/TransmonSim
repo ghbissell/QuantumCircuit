@@ -2,6 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from qutip import *
 
+plt.rcParams.update({
+    "figure.dpi": 130,
+})
+
 # System parameters
 N = 100
 Ec = 1.0 
@@ -27,14 +31,12 @@ for i, E in enumerate(energies):
     if len(crossings) >= 2:
         phi_L = phi_vals[crossings[0]]
         phi_R = phi_vals[crossings[-1]]
-        plt.hlines(E, phi_L, phi_R, colors=f"C{i}", linestyles='--', label=f"$E_{i}$")
+        plt.hlines(E, phi_L, phi_R, linestyles='--', label=f"$E_{i}$")
 
-plt.title("Quantized Energy Levels in Transmon Potential Well")
-plt.xlabel("Phase $\\phi$")
+plt.xlabel("Superconducting Phase $\\phi$")
 plt.ylabel("Energy ($E_n / \hbar\\omega$ units)")
 plt.xlim(-np.pi, np.pi)
 plt.ylim(-EJ - 0.5, 25)
-plt.legend(loc='lower left', bbox_to_anchor=(1, 0.5))
 plt.xticks([-np.pi, -np.pi/2, 0, np.pi/2, np.pi],
                [r'$-\pi$', r'$-\pi/2$', r'$0$', r'$\pi/2$', r'$\pi$'])
 plt.yticks([])
