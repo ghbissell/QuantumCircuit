@@ -35,7 +35,7 @@ for alpha in alpha_list:
     freq = f01_GHz(EJ_eff(alpha, phi))
     ax.plot(phi_norm, freq, lw=2.0, label=rf"$\alpha={alpha:.2f}$")
 
-ax.set_xlabel(r"$\phi_b$", labelpad=4)
+ax.set_xlabel(r"$\phi_e$", labelpad=4)
 ax.set_ylabel(r"$f_{01}$ (GHz)", labelpad=6)
 ax.minorticks_on()
 ax.tick_params(axis='both', which='both', direction='in', top=True, right=True)
