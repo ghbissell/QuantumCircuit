@@ -1,0 +1,79 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+kappa_x = 0.20
+Ez      = 0.12
+h_perp  = 0.01
+a       = 2.0e-1
+
+def V_phi(phi, kappa_x, Ez, h_perp):
+    return kappa_x*np.cos(2*phi) - Ez*np.cos(phi) + h_perp*np.sin(phi)
+
+def solve_levels_spectral(kappa_x, Ez, h_perp, a, M=64, n_levels=3, Nphi=2000):
+    ms = np.arange(-M, M+1)
+    dim = ms.size
+    H = np.zeros((dim, dim), dtype=complex)
+    
+    H[np.arange(dim), np.arange(dim)] = a * (ms**2)
+
+    # -Ez cosφ
+    for i, m in enumerate(ms):
+        j = np.searchsorted(ms, m+1)
+        if 0 <= j < dim: H[i, j] += -Ez/2
+        j = np.searchsorted(ms, m-1)
+        if 0 <= j < dim: H[i, j] += -Ez/2
+
+    # h_perp sinφ
+    for i, m in enumerate(ms):
+        j = np.searchsorted(ms, m+1)
+        if 0 <= j < dim: H[i, j] += 1j*h_perp/2
+        j = np.searchsorted(ms, m-1)
+        if 0 <= j < dim: H[i, j] += -1j*h_perp/2
+
+    # kappa_x cos2φ
+    for i, m in enumerate(ms):
+        j = np.searchsorted(ms, m+2)
+        if 0 <= j < dim: H[i, j] += kappa_x/2
+        j = np.searchsorted(ms, m-2)
+        if 0 <= j < dim: H[i, j] += kappa_x/2
+            
+    H = (H + H.conj().T)/2
+    evals, evecs = np.linalg.eigh(H)
+    idx = np.argsort(evals.real)
+    E = evals[idx].real[:n_levels]
+
+    phi = np.linspace(-np.pi, np.pi, 1200, endpoint=False)
+    V = V_phi(phi, kappa_x, Ez, h_perp)
+    return phi, V, E
+
+phi, V, E = solve_levels_spectral(kappa_x, Ez, h_perp, a, M=64, n_levels=3, Nphi=2000)
+
+V_shift = V - V.min()
+E_shift = E - V.min()
+
+plt.rcParams['figure.dpi'] = 300
+fig, ax = plt.subplots(figsize=(8, 4.6))
+
+ax.plot(phi, V_shift, lw=1.8, color='C0')
+
+def draw_constrained_level(ax, phi, V_shift, E_i, **line_kws):
+    mask = V_shift <= E_i
+    if not mask.any():
+        return
+    padded = np.r_[False, mask, False]
+    starts = np.where(~padded[:-1] & padded[1:])[0]
+    ends   = np.where(padded[:-1] & ~padded[1:])[0]
+    for s, e in zip(starts, ends):
+        ax.hlines(E_i, phi[s], phi[e-1], **line_kws)
+
+for Ei in zip(E_shift):
+    draw_constrained_level(ax, phi, V_shift, Ei, color='orange', linewidth=1.2)
+
+ax.set_xlabel(r"$\phi$")
+ax.set_ylabel(r"$V_0(\phi)$")
+plt.title("Double-well Energy Potential of Helicity Skyrmion Qubit")
+ax.grid(False)
+ax.tick_params(axis='both', which='both', length=0)
+
+plt.tight_layout()
+plt.show()
